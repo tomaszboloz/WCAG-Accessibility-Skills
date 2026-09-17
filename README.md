@@ -6,7 +6,9 @@
 
 WCAG Accessibility Skills is an open-source command skill for static accessibility evidence, review planning, and CI regression gates. It is intended for web accessibility audits, digital accessibility development, and accessibility compliance workflows across Claude MCP, OpenAI Codex, Gemini function calling, and any agent host that can execute a command or consume JSON.
 
-![Architecture overview with input, audit engine, report and review queue](docs/architecture-diagram.html)
+![Architecture overview with input, audit engine, report and review queue](docs/architecture-overview.svg)
+
+[Open the standalone HTML architecture diagram](docs/architecture-diagram.html).
 
 ## Contents
 
