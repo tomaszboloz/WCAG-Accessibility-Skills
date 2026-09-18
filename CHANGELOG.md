@@ -2,6 +2,11 @@
 
 All notable changes follow Semantic Versioning.
 
+## 1.1.3 — 2026-09-18
+
+- Reduce the repository to the CLI, runtime source, tests, CI, package metadata, and its single user-facing README.
+- Remove repository-only specifications, adapter instructions, unused configuration presets, examples, and redundant helper scripts.
+
 ## 1.1.2 — 2026-09-18
 
 - Publish only the CLI runtime, README, and license in the npm tarball; keep PRD, specifications, tests, examples, CI, and development scripts in the repository.

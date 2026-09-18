@@ -6,12 +6,6 @@
 
 WCAG Accessibility Skills is an open-source command skill for static accessibility evidence, review planning, and CI regression gates. It is intended for web accessibility audits, digital accessibility development, and accessibility compliance workflows across Claude MCP, OpenAI Codex, Gemini function calling, and any agent host that can execute a command or consume JSON.
 
-For Codex and other skill-aware agents, the repository [SKILL.md](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/SKILL.md) is the portable discovery adapter. It routes slash commands to the CLI and preserves the mandatory manual-review boundary. It intentionally remains in the repository rather than the npm runtime artifact.
-
-![Architecture overview with input, audit engine, report and review queue](https://raw.githubusercontent.com/tomaszboloz/WCAG-Accessibility-Skills/main/docs/architecture-overview.svg)
-
-[Open the standalone HTML architecture diagram](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/architecture-diagram.html).
-
 ## Contents
 
 - [Why](#why)
@@ -59,8 +53,8 @@ Key features are:
 14. Delegation payloads with priority, current evidence, proposal, and acceptance criteria.
 15. Node built-in unit and integration tests.
 16. A GitHub Actions workflow that validates package invariants.
-17. Adapter contracts for Claude MCP, Codex, and Gemini without coupling the rule engine to one platform.
-18. WCAG-EM reporting outline and a 60-source reference list.
+17. A stable command and JSON contract for any host that can execute a local process.
+18. A focused repository with only the CLI, runtime, tests, CI, and user documentation.
 
 The package intentionally does not claim a 95% detection rate, “86 of 86 automatically tested,” or a universal two-second result. Those statements would need a versioned implementation, test corpus, machine profile, and methodology. The current metric is precise: the registry covers all criteria in scope, while only a subset has deterministic source evidence. The remaining criteria are labelled rather than hidden.
 
@@ -88,16 +82,16 @@ node bin/wcag-skill.js configure AA 2.2
 
 There are no production dependencies to install. To use it as a package command, run `npm link` during local development or execute `node bin/wcag-skill.js` directly. The configuration command writes `.wcag-skill.json` in the current project; commit it only when its shared project policy is intentional.
 
-The npm artifact intentionally contains only the executable, runtime source, `README.md`, `LICENSE`, and npm metadata. PRD, architecture and API documents, source lists, example files, tests, CI definitions, development scripts, and the repository-only agent adapter stay in GitHub so an installation contains no internal specifications.
+The npm artifact and repository intentionally contain only the executable, runtime source, tests, CI, `README.md`, `LICENSE`, and package metadata. There are no PRDs, agent-specification files, example projects, configuration presets, or secondary documentation trees to maintain.
 
-For Claude MCP, expose a tool that accepts the adapter contract in the [API reference](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/api-reference.md) and runs the CLI in the project sandbox. For Codex, place the repository skill instructions in the host’s skills discovery location or invoke the CLI from the current workspace. For Gemini, define a function with `command`, `input`, and `options`, validate the enum values, and forward the canonical JSON unchanged. Each integration must use the host’s own authorization boundary for file writes, network access, or ticket creation.
+For host integrations, run the CLI in the project sandbox, validate the command arguments, and preserve the canonical JSON unchanged. Each host must apply its own authorization boundary for file writes, network access, or ticket creation.
 
 ## Quick start
 
-Audit the included deliberately inaccessible sample:
+Audit an HTML fragment:
 
 ```bash
-node scripts/quick-scan.js examples/sample-audits/inaccessible.html --format markdown
+node bin/wcag-skill.js audit '<img src="product.jpg"><button></button>' --format markdown --fail-on none
 ```
 
 The scanner reports a missing page language and title, an image without `alt`, an unnamed link or control where present, and a heading jump. It also emits a long manual-review list. That second list is expected: its presence means the tool refuses to treat a static pass as certification.
@@ -127,14 +121,10 @@ The IDs are deterministic for the same criterion, message, and evidence; copy th
 For a simple CI gate:
 
 ```bash
-node scripts/ci-integration.js https://staging.example.test --output reports/staging.json
+wcag-audit https://staging.example.test --format json --output reports/staging.json --fail-on high
 ```
 
-Use an allowlisted staging host in production CI to avoid server-side request forgery. Build systems should retain the report as an artefact, redact sensitive evidence, and treat network errors as operational failures rather than as a clean scan. To block only regressions, create a baseline report and compare it:
-
-```bash
-node scripts/regression-test.js reports/baseline.json reports/current.json
-```
+Use an allowlisted staging host in production CI to avoid server-side request forgery. Build systems should retain the report as an artefact, redact sensitive evidence, and treat network errors as operational failures rather than as a clean scan. If you compare reports across builds, do so in the CI system with the same WCAG version and level.
 
 ## Usage guide
 
@@ -144,11 +134,11 @@ The severity labels prioritise remediation; they are not WCAG conformance levels
 
 `/wcag-check` returns one registry object containing its criterion title, conformance level, verification class, and W3C Understanding URL. It is useful in agent prompts: a developer can request `/wcag-check 3.3.2` before fixing an unnamed control. `/wcag-configure` validates and writes a local default scope, which later audits now load automatically.
 
-`report` renders an existing JSON report and does not re-audit. It is useful after a CI job has stored canonical output. HTML output is a portable human-readable report; PDF conversion is intentionally delegated to the host rather than including a non-deterministic browser dependency. The [WCAG-EM outline](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/wcag-em-template.md) explains what an evaluator must add before publishing an evaluation report.
+`report` renders an existing JSON report and does not re-audit. It is useful after a CI job has stored canonical output. HTML output is a portable human-readable report; PDF conversion is intentionally delegated to the host rather than including a non-deterministic browser dependency. A published evaluation still needs scope, pages, evaluator, methods, dates, exceptions, and manual-test evidence.
 
 `fix` reads an issue from an existing report and produces its suggested remediation, collected evidence, and required verification. It does not modify code. `delegate` produces a structured task. For critical or high issues its priority is P1; other issues are P2. The task requires a narrow implementation, a repeat audit, and human keyboard/assistive-technology review. A host can create a ticket, start a coding sub-agent, or present it to a developer. It must report task state and escalation if a re-audit still finds the issue.
 
-Use `batch-processor.js` with one target per line when auditing multiple independent pages. The processor keeps an error for an inaccessible target rather than abandoning the entire set. Bound concurrency is intentionally left to a host-specific wrapper because the correct value depends on the target, network policy, and rate limit. Never scan production systems without permission; do not put credentials in URLs; and store report evidence as potentially sensitive development data.
+Audit multiple independent pages through your own bounded CI or shell wrapper. Keep an error for an inaccessible target rather than abandoning the entire set. The correct concurrency depends on the target, network policy, and rate limit. Never scan production systems without permission; do not put credentials in URLs; and store report evidence as potentially sensitive development data.
 
 For rich applications, a static source check is only one layer. Add a browser adapter that waits for stable rendering, include axe-core results with engine metadata, run keyboard tests through complete user journeys, inspect the accessibility tree, test zoom/reflow and touch targets, verify messages with a screen reader, and include people with disabilities in usability work. Where a tool and a person disagree, retain the evidence and investigate rather than choosing the more convenient result.
 
@@ -255,7 +245,6 @@ wcag-status --report reports/audit.json
 
 ```bash
 wcag-audit ./dist/checkout.html --output reports/current.json --fail-on none
-node scripts/regression-test.js reports/baseline.json reports/current.json
 ```
 
 **Agent repair hand-off.** Inspect the finding, create a bounded task, allow a fixing agent to propose a patch, then independently re-audit and manually test. The fixing agent must not mark its own work as conformant based solely on a zero-issue static result.
@@ -318,17 +307,17 @@ Finally, store the human evaluation alongside the automated artefacts. A zero-is
 
 ## WCAG coverage
 
-The [coverage matrix](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/wcag-coverage.md) maps all active WCAG 2.2 criteria to automated, semi-automated, or manual verification. Level selection is cumulative: AA includes A, and AAA includes AA and A. WCAG 2.1 includes 78 active criteria; WCAG 2.2 includes 86 because 4.1.1 Parsing is obsolete and nine new criteria were added. The registry models this explicitly.
+The embedded rule registry maps all active WCAG 2.2 criteria to automated, semi-automated, or manual verification. Level selection is cumulative: AA includes A, and AAA includes AA and A. WCAG 2.1 includes 78 active criteria; WCAG 2.2 includes 86 because 4.1.1 Parsing is obsolete and nine new criteria were added. The registry models this explicitly.
 
 Automated source evidence is strongest for necessary syntactic facts. It can establish that an `img` lacks an `alt` attribute, but not whether a present alternative is meaningful. It can find an input without an associated programmatic label, but cannot establish whether its instructions are clear to a person. It can flag a positive tabindex, but only a user journey demonstrates an understandable focus order. Treat semi-automated prompts as a reviewer’s checklist, not a failure or pass by themselves.
 
 ## Architecture
 
-The [architecture documentation](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/architecture.md) includes component, data-flow, sequence, and platform-integration diagrams. The core is a local pipeline: command parser, input loader, scope registry, deterministic detectors, manual queue, and report formatter. Platform adapters stay outside the core so that Claude, Codex, Gemini, a shell, or CI can use the same JSON. Optional browser engines are additive; their findings must identify the engine and version, and never replace the manual queue.
+The core is a local pipeline: command parser, input loader, scope registry, deterministic detectors, manual queue, and report formatter. Optional browser engines are additive; their findings must identify the engine and version, and never replace the manual queue.
 
 ## API reference
 
-See the [API reference](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/api-reference.md). The only stable interchange is canonical JSON. Consumers should use criterion, message, and evidence to compare findings because issue IDs are local to an audit report. This prevents a regenerated report from creating misleading regressions solely because IDs changed.
+The only stable interchange is canonical JSON. Consumers should use criterion, message, and evidence to compare findings because issue IDs are local to an audit report. This prevents a regenerated report from creating misleading regressions solely because IDs changed.
 
 ## Comparison
 
@@ -341,7 +330,7 @@ Use this repository when a team needs a portable, inspectable command contract a
 3. **Why does it list manual criteria?** To make the audit scope transparent.
 4. **Why no axe-core dependency?** The base is portable; an adapter can add it.
 5. **Can I audit a SPA?** Use a rendered-browser adapter for dynamic states.
-6. **Can I use it in CI?** Yes; use `ci-integration.js` and preserve JSON output.
+6. **Can I use it in CI?** Yes; invoke `wcag-audit` and preserve JSON output.
 7. **What does exit code 1 mean?** Critical or high static evidence was found.
 8. **What does exit code 2 mean?** Invalid arguments or an operational error.
 9. **Is a URL scan private?** No assumption is made; use controlled hosts and avoid sensitive URLs.
@@ -350,17 +339,17 @@ Use this repository when a team needs a portable, inspectable command contract a
 12. **Why are contrast checks not fully automatic here?** Rendered CSS and visual context need a browser and review.
 13. **Is WCAG 2.1 supported?** Yes, including 4.1.1 only in the 2.1 scope.
 14. **How are reports versioned?** `schemaVersion` is part of JSON; releases use SemVer.
-15. **Where are sources?** The [repository source list](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/sources.md) lists 60 references.
+15. **Where are sources?** Each manual-review entry contains the official W3C Understanding URL for its success criterion.
 16. **Which command should an AI agent call first?** Start with `/wcag-audit` when the agent has a URL, file, or HTML fragment and needs current evidence. Start with `/wcag-check` only when the agent already knows the success criterion and needs its registry metadata. The agent should store the returned JSON report, never summarize away the `manualReview` list, and ask for host authorization before it applies any proposed repair.
 17. **Can `/wcag-fix` change my files automatically?** No. It intentionally returns a bounded proposal, evidence, and verification instruction only. A host may pass that output to an authorized coding agent, but the host must decide which files are in scope, show the resulting diff, re-run the audit, and retain human review for the criterion. This prevents a report renderer from becoming an unreviewed code-writing path.
 18. **Why does a finding have a stable-looking ID?** The ID is a SHA-256-derived fingerprint of the criterion, message, and evidence, so identical evidence produces the same ID across equivalent audits. It is useful for `/wcag-fix`, `/wcag-delegate`, and baseline workflows. It is not a permanent database key: if the affected HTML changes, the evidence and therefore the finding ID can change too.
 19. **What does `--fail-on none` do, and is it safe?** It makes a successfully completed audit return zero even when findings exist, so a pipeline can collect a report before policy enforcement is enabled. It does not suppress findings, change the report, or convert invalid input, a failed fetch, or malformed JSON into success; those remain exit code two. Use it for discovery or artefact collection, not to conceal a release decision.
 20. **How should CI handle exit code 1 versus exit code 2?** Treat exit code one as valid accessibility evidence that reached your configured threshold. Upload the report and route the issue to the responsible team. Treat exit code two as an operational failure: the auditor could not form a valid conclusion because inputs, network access, configuration, or report data were invalid. A pipeline must never label exit code two as a clean accessibility pass.
-21. **Does the tool crawl an entire site from one URL?** No. `/wcag-audit` handles one target per invocation. Use `scripts/batch-processor.js` with a reviewed, permissioned list of target URLs or files for multiple pages. A real website evaluation also needs representative-page selection and complete-process sampling; follow WCAG-EM rather than assuming a URL list alone proves site-wide conformance.
+21. **Does the tool crawl an entire site from one URL?** No. `/wcag-audit` handles one target per invocation. Run it from a reviewed, permissioned target list in your own CI or shell wrapper. A real website evaluation also needs representative-page selection and complete-process sampling; a URL list alone does not prove site-wide conformance.
 22. **Can I scan authenticated pages?** Only if the host provides an approved, secure rendering or authentication workflow. Do not put usernames, passwords, session tokens, or signed URLs into command lines, shell history, source code, or JSON reports. The base static scanner is intentionally not an authenticated browser automation system. Build an adapter with secret management, URL allowlists, redacted logs, and short-lived credentials if that scope is needed.
 23. **Why are colour contrast and focus visibility often listed for review?** The base package sees static HTML, not final computed CSS, pseudo-states, user preferences, font rendering, overlays, or animation timing. A rule that claims to decide contrast or visible focus without rendered context would create misleading results. Use a browser-based adapter for computed-style evidence, then manually inspect hover, focus, forced-colours, zoom, and interactive states.
 24. **Can this replace manual screen-reader testing?** No. A screen reader presents a live accessibility tree, interaction model, announcements, and browser-specific behaviour that source inspection cannot fully predict. Test representative flows with the assistive-technology combinations used by the product’s audience, document the versions and tasks, and include keyboard-only testing. Automated evidence is a complementary early signal, not a replacement.
-25. **What is the difference between automated, semi-automated, and manual coverage?** Automated means this implementation has a deterministic rule that can collect a source-level result. Semi-automated means the tool can identify relevant evidence but a person decides the outcome; a heading pattern or accessible name may still be inappropriate in context. Manual means the success criterion requires a human evaluation method. The classification is documented in the coverage matrix and is deliberately preserved in every report.
+25. **What is the difference between automated, semi-automated, and manual coverage?** Automated means this implementation has a deterministic rule that can collect a source-level result. Semi-automated means the tool can identify relevant evidence but a person decides the outcome; a heading pattern or accessible name may still be inappropriate in context. Manual means the success criterion requires a human evaluation method. The classification is embedded in the registry and is preserved in every report.
 26. **Can I claim WCAG AA conformance after the report has no findings?** No. A conformance claim requires evaluation of every applicable requirement, including manual and semi-automated work, within a defined scope. It also requires an accurate statement of pages, complete processes, technologies, exceptions, evaluator, and date. A zero-finding static report should be recorded as one input to that evaluation, never presented as a certificate.
 27. **How do I add axe-core, Pa11y, or Lighthouse?** Implement an adapter outside `src/core/` that runs the selected engine against a controlled rendered page, captures its version and configuration, converts its output into additive evidence, and retains the core manual-review queue. Do not overwrite one engine’s finding with another or map a third-party rule to a WCAG criterion without documenting the mapping. Add fixtures and integration tests before using the adapter as a release gate.
 28. **What should I include in a bug report for a false positive or false negative?** Provide the command and version, a minimal non-sensitive HTML example or reproducible URL, expected and actual result, criterion reference, target browser or renderer if relevant, and why the evidence is insufficient or wrong. For a false negative, explain the user impact and the test method that exposed it. Do not include credentials, personal data, or production tokens.

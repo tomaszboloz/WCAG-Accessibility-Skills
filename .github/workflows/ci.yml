@@ -14,5 +14,4 @@ jobs:
       - run: npm run verify:package
       - run: npm test
       - run: npm run validate
-      - run: node scripts/ci-integration.js examples/sample-audits/inaccessible.html --output reports/audit.json
-        continue-on-error: true
+      - run: node bin/wcag-skill.js audit '<!doctype html><html lang="en"><head><title>CI fixture</title></head><body><main><h1>CI fixture</h1></main></body></html>' --fail-on none --output /tmp/wcag-audit.json

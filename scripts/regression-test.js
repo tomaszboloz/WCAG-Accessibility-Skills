@@ -1,4 +1,0 @@
-#!/usr/bin/env node
-'use strict';
-const fs=require('node:fs/promises');
-async function main(){const [baselinePath,currentPath]=process.argv.slice(2);if(!baselinePath||!currentPath)throw new Error('Usage: regression-test.js <baseline.json> <current.json>');const [base,current]=await Promise.all([fs.readFile(baselinePath,'utf8').then(JSON.parse),fs.readFile(currentPath,'utf8').then(JSON.parse)]);const known=new Set(base.issues.map(i=>`${i.criterion}|${i.message}|${i.evidence}`));const introduced=current.issues.filter(i=>!known.has(`${i.criterion}|${i.message}|${i.evidence}`));console.log(JSON.stringify({baseline:base.source,current:current.source,newIssueCount:introduced.length,newIssues:introduced},null,2));process.exitCode=introduced.some(i=>['critical','high'].includes(i.severity))?1:0;}main().catch(e=>{console.error(`regression-test: ${e.message}`);process.exitCode=2;});
