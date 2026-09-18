@@ -10,6 +10,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci --ignore-scripts
+      - run: npm run verify:line-endings
       - run: npm test
       - run: npm run validate
       - run: node scripts/ci-integration.js examples/sample-audits/inaccessible.html --output reports/audit.json

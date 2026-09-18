@@ -2,6 +2,13 @@
 
 All notable changes follow Semantic Versioning.
 
+## 1.1.1 — 2026-09-18
+
+- Replace invalid numeric W3C Understanding URLs with verified official slugs for all 86 active WCAG 2.2 criteria.
+- Correct WCAG 2.2 levels for 2.4.10 Section Headings and 2.5.6 Concurrent Input Mechanisms, restoring the Level AA scope to 55 criteria.
+- Escape report-controlled values in HTML output and apply a restrictive Content Security Policy to prevent report XSS.
+- Enforce LF line endings for tracked files and verify them in CI.
+
 ## 1.1.0 — 2026-09-17
 
 - Add root `SKILL.md` adapter for Codex skill discovery and portable agent routing.

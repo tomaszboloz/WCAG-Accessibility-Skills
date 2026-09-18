@@ -29,12 +29,12 @@ The executable registry in `src/core/rules.js` is the canonical 86-row matrix. â
 |2.4.3|A|Semi|2.4.4|A|Semi|
 |2.4.5|AA|Manual|2.4.6|AA|Semi|
 |2.4.7|AA|Manual|2.4.8|AAA|Manual|
-|2.4.9|AAA|Manual|2.4.10|AA|Semi|
+|2.4.9|AAA|Manual|2.4.10|AAA|Semi|
 |2.4.11|AA|Manual|2.4.12|AAA|Manual|
 |2.4.13|AAA|Manual|2.5.1|A|Manual|
 |2.5.2|A|Manual|2.5.3|A|Semi|
 |2.5.4|A|Manual|2.5.5|AAA|Manual|
-|2.5.6|A|Manual|2.5.7|AA|Manual|
+|2.5.6|AAA|Manual|2.5.7|AA|Manual|
 |2.5.8|AA|Semi|3.1.1|A|Automated|
 |3.1.2|AA|Semi|3.1.3|AAA|Manual|
 |3.1.4|AAA|Manual|3.1.5|AAA|Manual|

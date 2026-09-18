@@ -9,14 +9,29 @@ const rows = [
 ['2.1.1','Keyboard','A','semi-automated'],['2.1.2','No Keyboard Trap','A','manual'],['2.1.3','Keyboard (No Exception)','AAA','manual'],['2.1.4','Character Key Shortcuts','A','semi-automated'],
 ['2.2.1','Timing Adjustable','A','manual'],['2.2.2','Pause, Stop, Hide','A','manual'],['2.2.3','No Timing','AAA','manual'],['2.2.4','Interruptions','AAA','manual'],['2.2.5','Re-authenticating','AAA','manual'],['2.2.6','Timeouts','AAA','manual'],
 ['2.3.1','Three Flashes or Below Threshold','A','manual'],['2.3.2','Three Flashes','AAA','manual'],['2.3.3','Animation from Interactions','AAA','semi-automated'],
-['2.4.1','Bypass Blocks','A','semi-automated'],['2.4.2','Page Titled','A','automated'],['2.4.3','Focus Order','A','semi-automated'],['2.4.4','Link Purpose (In Context)','A','semi-automated'],['2.4.5','Multiple Ways','AA','manual'],['2.4.6','Headings and Labels','AA','semi-automated'],['2.4.7','Focus Visible','AA','manual'],['2.4.8','Location','AAA','manual'],['2.4.9','Link Purpose (Link Only)','AAA','manual'],['2.4.10','Section Headings','AA','semi-automated'],['2.4.11','Focus Not Obscured (Minimum)','AA','manual'],['2.4.12','Focus Not Obscured (Enhanced)','AAA','manual'],['2.4.13','Focus Appearance','AAA','manual'],
-['2.5.1','Pointer Gestures','A','manual'],['2.5.2','Pointer Cancellation','A','manual'],['2.5.3','Label in Name','A','semi-automated'],['2.5.4','Motion Actuation','A','manual'],['2.5.5','Target Size (Enhanced)','AAA','manual'],['2.5.6','Concurrent Input Mechanisms','A','manual'],['2.5.7','Dragging Movements','AA','manual'],['2.5.8','Target Size (Minimum)','AA','semi-automated'],
+['2.4.1','Bypass Blocks','A','semi-automated'],['2.4.2','Page Titled','A','automated'],['2.4.3','Focus Order','A','semi-automated'],['2.4.4','Link Purpose (In Context)','A','semi-automated'],['2.4.5','Multiple Ways','AA','manual'],['2.4.6','Headings and Labels','AA','semi-automated'],['2.4.7','Focus Visible','AA','manual'],['2.4.8','Location','AAA','manual'],['2.4.9','Link Purpose (Link Only)','AAA','manual'],['2.4.10','Section Headings','AAA','semi-automated'],['2.4.11','Focus Not Obscured (Minimum)','AA','manual'],['2.4.12','Focus Not Obscured (Enhanced)','AAA','manual'],['2.4.13','Focus Appearance','AAA','manual'],
+['2.5.1','Pointer Gestures','A','manual'],['2.5.2','Pointer Cancellation','A','manual'],['2.5.3','Label in Name','A','semi-automated'],['2.5.4','Motion Actuation','A','manual'],['2.5.5','Target Size (Enhanced)','AAA','manual'],['2.5.6','Concurrent Input Mechanisms','AAA','manual'],['2.5.7','Dragging Movements','AA','manual'],['2.5.8','Target Size (Minimum)','AA','semi-automated'],
 ['3.1.1','Language of Page','A','automated'],['3.1.2','Language of Parts','AA','semi-automated'],['3.1.3','Unusual Words','AAA','manual'],['3.1.4','Abbreviations','AAA','manual'],['3.1.5','Reading Level','AAA','manual'],['3.1.6','Pronunciation','AAA','manual'],
 ['3.2.1','On Focus','A','manual'],['3.2.2','On Input','A','manual'],['3.2.3','Consistent Navigation','AA','manual'],['3.2.4','Consistent Identification','AA','semi-automated'],['3.2.5','Change on Request','AAA','manual'],['3.2.6','Consistent Help','A','manual'],
 ['3.3.1','Error Identification','A','semi-automated'],['3.3.2','Labels or Instructions','A','automated'],['3.3.3','Error Suggestion','AA','semi-automated'],['3.3.4','Error Prevention (Legal, Financial, Data)','AA','manual'],['3.3.5','Help','AAA','manual'],['3.3.6','Error Prevention (All)','AAA','manual'],['3.3.7','Redundant Entry','A','manual'],['3.3.8','Accessible Authentication (Minimum)','AA','manual'],['3.3.9','Accessible Authentication (Enhanced)','AAA','manual'],
 ['4.1.2','Name, Role, Value','A','automated'],['4.1.3','Status Messages','AA','semi-automated']
 ];
-const RULES = rows.map(([id,title,level,verification]) => ({ id, title, level, verification, url: `https://www.w3.org/WAI/WCAG22/Understanding/${id.replace('.', '')}.html` }));
+const understandingSlugs = [
+  'non-text-content','audio-only-and-video-only-prerecorded','captions-prerecorded','audio-description-or-media-alternative-prerecorded','captions-live','audio-description-prerecorded','sign-language-prerecorded','extended-audio-description-prerecorded','media-alternative-prerecorded','audio-only-live',
+  'info-and-relationships','meaningful-sequence','sensory-characteristics','orientation','identify-input-purpose','identify-purpose',
+  'use-of-color','audio-control','contrast-minimum','resize-text','images-of-text','contrast-enhanced','low-or-no-background-audio','visual-presentation','images-of-text-no-exception','reflow','non-text-contrast','text-spacing','content-on-hover-or-focus',
+  'keyboard','no-keyboard-trap','keyboard-no-exception','character-key-shortcuts',
+  'timing-adjustable','pause-stop-hide','no-timing','interruptions','re-authenticating','timeouts',
+  'three-flashes-or-below-threshold','three-flashes','animation-from-interactions',
+  'bypass-blocks','page-titled','focus-order','link-purpose-in-context','multiple-ways','headings-and-labels','focus-visible','location','link-purpose-link-only','section-headings','focus-not-obscured-minimum','focus-not-obscured-enhanced','focus-appearance',
+  'pointer-gestures','pointer-cancellation','label-in-name','motion-actuation','target-size-enhanced','concurrent-input-mechanisms','dragging-movements','target-size-minimum',
+  'language-of-page','language-of-parts','unusual-words','abbreviations','reading-level','pronunciation',
+  'on-focus','on-input','consistent-navigation','consistent-identification','change-on-request','consistent-help',
+  'error-identification','labels-or-instructions','error-suggestion','error-prevention-legal-financial-data','help','error-prevention-all','redundant-entry','accessible-authentication-minimum','accessible-authentication-enhanced',
+  'name-role-value','status-messages'
+];
+if (understandingSlugs.length !== rows.length) throw new Error('WCAG understanding slug registry is incomplete.');
+const RULES = rows.map(([id,title,level,verification], index) => ({ id, title, level, verification, url: `https://www.w3.org/WAI/WCAG22/Understanding/${understandingSlugs[index]}.html` }));
 const WCAG_21_ONLY = { id:'4.1.1', title:'Parsing', level:'A', verification:'semi-automated', url:'https://www.w3.org/WAI/WCAG21/Understanding/parsing.html' };
 const LEVELS = { A: 1, AA: 2, AAA: 3 };
 function criteriaFor(level = 'AA', version = '2.2') {

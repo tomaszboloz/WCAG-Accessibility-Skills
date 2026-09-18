@@ -1,0 +1,3 @@
+'use strict';
+const test=require('node:test');const assert=require('node:assert/strict');const {html}=require('../../src');
+test('HTML report escapes attacker-controlled report data and blocks scripts by policy',()=>{const payload='<img src=x onerror=alert(1)><script>alert(1)</script>';const rendered=html({source:payload,wcag:{version:'2.2',level:'AA'},summary:{issues:1},issues:[{severity:'\"><script>alert(1)</script>',criterion:payload,message:payload,suggestedFix:payload}],disclaimer:payload});assert.equal(rendered.includes(payload),false);assert.match(rendered,/&lt;img src=x onerror=alert\(1\)&gt;/);assert.match(rendered,/class="severity-unknown"/);assert.match(rendered,/Content-Security-Policy/);assert.match(rendered,/default-src 'none'/);});
