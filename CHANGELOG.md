@@ -2,6 +2,11 @@
 
 All notable changes follow Semantic Versioning.
 
+## 1.1.2 — 2026-09-18
+
+- Publish only the CLI runtime, README, and license in the npm tarball; keep PRD, specifications, tests, examples, CI, and development scripts in the repository.
+- Add an automated package-content verification to CI.
+
 ## 1.1.1 — 2026-09-18
 
 - Replace invalid numeric W3C Understanding URLs with verified official slugs for all 86 active WCAG 2.2 criteria.

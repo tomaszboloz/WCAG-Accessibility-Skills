@@ -6,11 +6,11 @@
 
 WCAG Accessibility Skills is an open-source command skill for static accessibility evidence, review planning, and CI regression gates. It is intended for web accessibility audits, digital accessibility development, and accessibility compliance workflows across Claude MCP, OpenAI Codex, Gemini function calling, and any agent host that can execute a command or consume JSON.
 
-For Codex and other skill-aware agents, [SKILL.md](SKILL.md) is the portable discovery adapter. It routes slash commands to the CLI and preserves the mandatory manual-review boundary.
+For Codex and other skill-aware agents, the repository [SKILL.md](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/SKILL.md) is the portable discovery adapter. It routes slash commands to the CLI and preserves the mandatory manual-review boundary. It intentionally remains in the repository rather than the npm runtime artifact.
 
-![Architecture overview with input, audit engine, report and review queue](docs/architecture-overview.svg)
+![Architecture overview with input, audit engine, report and review queue](https://raw.githubusercontent.com/tomaszboloz/WCAG-Accessibility-Skills/main/docs/architecture-overview.svg)
 
-[Open the standalone HTML architecture diagram](docs/architecture-diagram.html).
+[Open the standalone HTML architecture diagram](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/architecture-diagram.html).
 
 ## Contents
 
@@ -88,7 +88,9 @@ node bin/wcag-skill.js configure AA 2.2
 
 There are no production dependencies to install. To use it as a package command, run `npm link` during local development or execute `node bin/wcag-skill.js` directly. The configuration command writes `.wcag-skill.json` in the current project; commit it only when its shared project policy is intentional.
 
-For Claude MCP, expose a tool that accepts the adapter contract in [docs/api-reference.md](docs/api-reference.md) and runs the CLI in the project sandbox. For Codex, place the repository skill instructions in the host’s skills discovery location or invoke the CLI from the current workspace. For Gemini, define a function with `command`, `input`, and `options`, validate the enum values, and forward the canonical JSON unchanged. Each integration must use the host’s own authorization boundary for file writes, network access, or ticket creation.
+The npm artifact intentionally contains only the executable, runtime source, `README.md`, `LICENSE`, and npm metadata. PRD, architecture and API documents, source lists, example files, tests, CI definitions, development scripts, and the repository-only agent adapter stay in GitHub so an installation contains no internal specifications.
+
+For Claude MCP, expose a tool that accepts the adapter contract in the [API reference](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/api-reference.md) and runs the CLI in the project sandbox. For Codex, place the repository skill instructions in the host’s skills discovery location or invoke the CLI from the current workspace. For Gemini, define a function with `command`, `input`, and `options`, validate the enum values, and forward the canonical JSON unchanged. Each integration must use the host’s own authorization boundary for file writes, network access, or ticket creation.
 
 ## Quick start
 
@@ -142,7 +144,7 @@ The severity labels prioritise remediation; they are not WCAG conformance levels
 
 `/wcag-check` returns one registry object containing its criterion title, conformance level, verification class, and W3C Understanding URL. It is useful in agent prompts: a developer can request `/wcag-check 3.3.2` before fixing an unnamed control. `/wcag-configure` validates and writes a local default scope, which later audits now load automatically.
 
-`report` renders an existing JSON report and does not re-audit. It is useful after a CI job has stored canonical output. HTML output is a portable human-readable report; PDF conversion is intentionally delegated to the host rather than including a non-deterministic browser dependency. The [WCAG-EM outline](docs/wcag-em-template.md) explains what an evaluator must add before publishing an evaluation report.
+`report` renders an existing JSON report and does not re-audit. It is useful after a CI job has stored canonical output. HTML output is a portable human-readable report; PDF conversion is intentionally delegated to the host rather than including a non-deterministic browser dependency. The [WCAG-EM outline](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/wcag-em-template.md) explains what an evaluator must add before publishing an evaluation report.
 
 `fix` reads an issue from an existing report and produces its suggested remediation, collected evidence, and required verification. It does not modify code. `delegate` produces a structured task. For critical or high issues its priority is P1; other issues are P2. The task requires a narrow implementation, a repeat audit, and human keyboard/assistive-technology review. A host can create a ticket, start a coding sub-agent, or present it to a developer. It must report task state and escalation if a re-audit still finds the issue.
 
@@ -316,17 +318,17 @@ Finally, store the human evaluation alongside the automated artefacts. A zero-is
 
 ## WCAG coverage
 
-The [coverage matrix](docs/wcag-coverage.md) maps all active WCAG 2.2 criteria to automated, semi-automated, or manual verification. Level selection is cumulative: AA includes A, and AAA includes AA and A. WCAG 2.1 includes 78 active criteria; WCAG 2.2 includes 86 because 4.1.1 Parsing is obsolete and nine new criteria were added. The registry models this explicitly.
+The [coverage matrix](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/wcag-coverage.md) maps all active WCAG 2.2 criteria to automated, semi-automated, or manual verification. Level selection is cumulative: AA includes A, and AAA includes AA and A. WCAG 2.1 includes 78 active criteria; WCAG 2.2 includes 86 because 4.1.1 Parsing is obsolete and nine new criteria were added. The registry models this explicitly.
 
 Automated source evidence is strongest for necessary syntactic facts. It can establish that an `img` lacks an `alt` attribute, but not whether a present alternative is meaningful. It can find an input without an associated programmatic label, but cannot establish whether its instructions are clear to a person. It can flag a positive tabindex, but only a user journey demonstrates an understandable focus order. Treat semi-automated prompts as a reviewer’s checklist, not a failure or pass by themselves.
 
 ## Architecture
 
-The [architecture documentation](docs/architecture.md) includes component, data-flow, sequence, and platform-integration diagrams. The core is a local pipeline: command parser, input loader, scope registry, deterministic detectors, manual queue, and report formatter. Platform adapters stay outside the core so that Claude, Codex, Gemini, a shell, or CI can use the same JSON. Optional browser engines are additive; their findings must identify the engine and version, and never replace the manual queue.
+The [architecture documentation](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/architecture.md) includes component, data-flow, sequence, and platform-integration diagrams. The core is a local pipeline: command parser, input loader, scope registry, deterministic detectors, manual queue, and report formatter. Platform adapters stay outside the core so that Claude, Codex, Gemini, a shell, or CI can use the same JSON. Optional browser engines are additive; their findings must identify the engine and version, and never replace the manual queue.
 
 ## API reference
 
-See [docs/api-reference.md](docs/api-reference.md). The only stable interchange is canonical JSON. Consumers should use criterion, message, and evidence to compare findings because issue IDs are local to an audit report. This prevents a regenerated report from creating misleading regressions solely because IDs changed.
+See the [API reference](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/api-reference.md). The only stable interchange is canonical JSON. Consumers should use criterion, message, and evidence to compare findings because issue IDs are local to an audit report. This prevents a regenerated report from creating misleading regressions solely because IDs changed.
 
 ## Comparison
 
@@ -348,7 +350,7 @@ Use this repository when a team needs a portable, inspectable command contract a
 12. **Why are contrast checks not fully automatic here?** Rendered CSS and visual context need a browser and review.
 13. **Is WCAG 2.1 supported?** Yes, including 4.1.1 only in the 2.1 scope.
 14. **How are reports versioned?** `schemaVersion` is part of JSON; releases use SemVer.
-15. **Where are sources?** [docs/sources.md](docs/sources.md) lists 60 references.
+15. **Where are sources?** The [repository source list](https://github.com/tomaszboloz/WCAG-Accessibility-Skills/blob/main/docs/sources.md) lists 60 references.
 16. **Which command should an AI agent call first?** Start with `/wcag-audit` when the agent has a URL, file, or HTML fragment and needs current evidence. Start with `/wcag-check` only when the agent already knows the success criterion and needs its registry metadata. The agent should store the returned JSON report, never summarize away the `manualReview` list, and ask for host authorization before it applies any proposed repair.
 17. **Can `/wcag-fix` change my files automatically?** No. It intentionally returns a bounded proposal, evidence, and verification instruction only. A host may pass that output to an authorized coding agent, but the host must decide which files are in scope, show the resulting diff, re-run the audit, and retain human review for the criterion. This prevents a report renderer from becoming an unreviewed code-writing path.
 18. **Why does a finding have a stable-looking ID?** The ID is a SHA-256-derived fingerprint of the criterion, message, and evidence, so identical evidence produces the same ID across equivalent audits. It is useful for `/wcag-fix`, `/wcag-delegate`, and baseline workflows. It is not a permanent database key: if the affected HTML changes, the evidence and therefore the finding ID can change too.
